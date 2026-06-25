@@ -1,6 +1,7 @@
 package com.bdms.user.controller;
 
 import com.bdms.common.response.ApiResponse;
+import com.bdms.user.dto.LoginRequest;
 import com.bdms.user.dto.UserRegistrationRequest;
 import com.bdms.user.service.UserService;
 import jakarta.validation.Valid;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("api/v1/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -20,6 +21,11 @@ public class UserController {
     public ApiResponse<String> register(@Valid @RequestBody UserRegistrationRequest request){
         userService.register(request);
         return ApiResponse.<String>builder().success(true).message("User registered successfully").data("User Registered").build();
+    }
+    @PostMapping("/login")
+    public ApiResponse<String> login(@Valid @RequestBody LoginRequest request){
+        String token = userService.login(request);
+        return  ApiResponse.<String>builder().success(true).message("Login successful").data(token).build();
     }
 }
 

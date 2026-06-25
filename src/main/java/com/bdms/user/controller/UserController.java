@@ -2,14 +2,12 @@ package com.bdms.user.controller;
 
 import com.bdms.common.response.ApiResponse;
 import com.bdms.user.dto.LoginRequest;
+import com.bdms.user.dto.UserProfileResponse;
 import com.bdms.user.dto.UserRegistrationRequest;
 import com.bdms.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -26,6 +24,12 @@ public class UserController {
     public ApiResponse<String> login(@Valid @RequestBody LoginRequest request){
         String token = userService.login(request);
         return  ApiResponse.<String>builder().success(true).message("Login successful").data(token).build();
+    }
+    @GetMapping("/me")
+    public ApiResponse<UserProfileResponse> getCurrentUser() {
+        UserProfileResponse currentUser = userService.getCurrentUser();
+
+        return ApiResponse.<UserProfileResponse>builder().success(true).message("User profile fetched successfully").data(currentUser).build();
     }
 }
 

@@ -3,6 +3,7 @@ package com.bdms.donor.controller;
 import com.bdms.common.response.ApiResponse;
 import com.bdms.donor.dto.CreateDonorRequest;
 import com.bdms.donor.dto.DonorProfileResponse;
+import com.bdms.donor.dto.UpdateDonorRequest;
 import com.bdms.donor.service.DonorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,21 @@ public class DonorController {
     }
     @GetMapping("/me")
     public ApiResponse<DonorProfileResponse> getMyDonorProfile(){
-        DonorProfileResponse byDonorProfile = donorService.getByDonorProfile();
+        DonorProfileResponse byDonorProfile = donorService.getMyDonorProfile();
         return ApiResponse.<DonorProfileResponse>builder()
                 .success(true)
                 .message("Donor profile fetched successfully")
                 .data(byDonorProfile)
+                .build();
+    }
+    @PutMapping("/me")
+    public ApiResponse<DonorProfileResponse> updateMyDonorProfile(@Valid @RequestBody UpdateDonorRequest request){
+
+        DonorProfileResponse response = donorService.updateMyDonorProfile(request);
+        return ApiResponse.<DonorProfileResponse>builder()
+                .success(true)
+                .message("Donor profile updated successfully")
+                .data(response)
                 .build();
     }
 }

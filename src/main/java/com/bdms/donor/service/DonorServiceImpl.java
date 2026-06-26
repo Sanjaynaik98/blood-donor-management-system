@@ -4,6 +4,7 @@ import com.bdms.common.exception.BadRequestException;
 import com.bdms.common.exception.ResourceNotFoundException;
 import com.bdms.donor.dto.CreateDonorRequest;
 import com.bdms.donor.dto.DonorProfileResponse;
+import com.bdms.donor.dto.UpdateDonorRequest;
 import com.bdms.donor.entity.Donor;
 import com.bdms.donor.repository.DonorRepository;
 import com.bdms.user.entity.User;
@@ -23,10 +24,7 @@ public class DonorServiceImpl implements DonorService{
     private final UserRepository userRepository;
     @Override
     public void createDonorProfile(CreateDonorRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        User user =getCurrentUser();
         if(donorRepository.existsByUser(user)){
             throw  new BadRequestException("Donor profile already exists");
         }
@@ -45,13 +43,45 @@ public class DonorServiceImpl implements DonorService{
     }
 
     @Override
-    public DonorProfileResponse getByDonorProfile() {
+    public DonorProfileResponse getMyDonorProfile() {
+        Donor donor=getCurrentDonor();
+
+        return mapToResponse(donor);
+    }
+
+    @Override
+    public DonorProfileResponse updateMyDonorProfile(UpdateDonorRequest request) {
+        Donor donor=getCurrentDonor();
+        donor.setPhone(request.getPhone());
+        donor.setCity(request.getCity());
+        donor.setState(request.getState());
+        donor.setAvailable(request.getAvailable());
+        donor.setUpdatedAt(LocalDateTime.now());
+        donor=donorRepository.save(donor);
+        return mapToResponse(donor);
+    }
+    
+    private Donor getCurrentDonor(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
-        Donor donor = donorRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Donor not found"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        return DonorProfileResponse.builder().id(donor.getId())
+        Donor donor = donorRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Donor not found"));
+        return donor;
+
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
+    private DonorProfileResponse mapToResponse(Donor donor){
+         return DonorProfileResponse.builder()
+                .id(donor.getId())
                 .bloodGroup(donor.getBloodGroup())
                 .phone(donor.getPhone())
                 .gender(donor.getGender())
@@ -61,5 +91,6 @@ public class DonorServiceImpl implements DonorService{
                 .lastDonationDate(donor.getLastDonationDate())
                 .available(donor.getAvailable())
                 .build();
+
     }
 }

@@ -4,7 +4,9 @@ import com.bdms.common.exception.BadRequestException;
 import com.bdms.common.exception.ResourceNotFoundException;
 import com.bdms.donor.dto.CreateDonorRequest;
 import com.bdms.donor.dto.DonorProfileResponse;
+import com.bdms.donor.dto.DonorSearchResponse;
 import com.bdms.donor.dto.UpdateDonorRequest;
+import com.bdms.donor.entity.BloodGroup;
 import com.bdms.donor.entity.Donor;
 import com.bdms.donor.repository.DonorRepository;
 import com.bdms.user.entity.User;
@@ -15,6 +17,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +64,25 @@ public class DonorServiceImpl implements DonorService{
         donor=donorRepository.save(donor);
         return mapToResponse(donor);
     }
-    
+
+    @Override
+    public List<DonorSearchResponse> searchDonors(BloodGroup bloodGroup) {
+        List<Donor> donors = donorRepository.findByBloodGroupAndAvailableTrue(bloodGroup);
+        List<DonorSearchResponse> responses=new ArrayList<>();
+        for(Donor donor:donors){
+            responses.add(
+                    DonorSearchResponse.builder().id(donor.getId())
+                            .name(donor.getUser().getName())
+                            .bloodGroup(donor.getBloodGroup())
+                            .city(donor.getCity())
+                            .state(donor.getState())
+                            .phone(donor.getPhone())
+                            .build()
+            );
+        }
+        return responses;
+    }
+
     private Donor getCurrentDonor(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

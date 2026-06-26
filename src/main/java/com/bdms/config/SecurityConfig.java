@@ -22,7 +22,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(req -> req.requestMatchers("/api/v1/health", "/api/v1/users/register", "/api/v1/users/login")
+                .authorizeHttpRequests(req -> req.requestMatchers(SecurityConstants.PUBLIC_URLS
+                        )
                         .permitAll()
                         .anyRequest()
                         .authenticated())

@@ -3,6 +3,7 @@ package com.bdms.donor.service;
 import com.bdms.common.exception.BadRequestException;
 import com.bdms.common.exception.ResourceNotFoundException;
 import com.bdms.donor.dto.CreateDonorRequest;
+import com.bdms.donor.dto.DonorProfileResponse;
 import com.bdms.donor.entity.Donor;
 import com.bdms.donor.repository.DonorRepository;
 import com.bdms.user.entity.User;
@@ -41,5 +42,24 @@ public class DonorServiceImpl implements DonorService{
                 .updatedAt(LocalDateTime.now())
                 .build();
         donorRepository.save(donor);
+    }
+
+    @Override
+    public DonorProfileResponse getByDonorProfile() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+        Donor donor = donorRepository.findByUser(user).orElseThrow(() -> new ResourceNotFoundException("Donor not found"));
+
+        return DonorProfileResponse.builder().id(donor.getId())
+                .bloodGroup(donor.getBloodGroup())
+                .phone(donor.getPhone())
+                .gender(donor.getGender())
+                .dateOfBirth(donor.getDateOfBirth())
+                .city(donor.getCity())
+                .state(donor.getState())
+                .lastDonationDate(donor.getLastDonationDate())
+                .available(donor.getAvailable())
+                .build();
     }
 }

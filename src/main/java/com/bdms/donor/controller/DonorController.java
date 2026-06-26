@@ -2,13 +2,11 @@ package com.bdms.donor.controller;
 
 import com.bdms.common.response.ApiResponse;
 import com.bdms.donor.dto.CreateDonorRequest;
+import com.bdms.donor.dto.DonorProfileResponse;
 import com.bdms.donor.service.DonorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/donors")
@@ -23,6 +21,15 @@ public class DonorController {
                 .success(true)
                 .message("Donor profile created successfully")
                 .data("Donor profile created")
+                .build();
+    }
+    @GetMapping("/me")
+    public ApiResponse<DonorProfileResponse> getMyDonorProfile(){
+        DonorProfileResponse byDonorProfile = donorService.getByDonorProfile();
+        return ApiResponse.<DonorProfileResponse>builder()
+                .success(true)
+                .message("Donor profile fetched successfully")
+                .data(byDonorProfile)
                 .build();
     }
 }

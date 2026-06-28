@@ -9,13 +9,17 @@ import com.bdms.donor.dto.DonorSearchResponse;
 import com.bdms.donor.dto.UpdateDonorRequest;
 import com.bdms.donor.entity.BloodGroup;
 import com.bdms.donor.entity.Donor;
+import com.bdms.donor.entity.Gender;
 import com.bdms.donor.repository.DonorRepository;
+import com.bdms.donor.specification.DonorSpecification;
+import com.bdms.user.entity.Role;
 import com.bdms.user.entity.User;
 import com.bdms.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -31,6 +35,9 @@ public class DonorServiceImpl implements DonorService{
     @Override
     public void createDonorProfile(CreateDonorRequest request) {
         User user =getCurrentUser();
+        if(user.getRole()!= Role.DONOR){
+            throw new BadRequestException("Only donor users can create donor profiles.");
+        }
         if(donorRepository.existsByUser(user)){
             throw  new BadRequestException("Donor profile already exists");
         }
@@ -69,9 +76,25 @@ public class DonorServiceImpl implements DonorService{
 
 
     @Override
-    public PagedResponse<DonorSearchResponse> searchDonors(BloodGroup bloodGroup,String city, int page, int size) {
+    public PagedResponse<DonorSearchResponse> searchDonors(BloodGroup bloodGroup, String city, String state, Gender gender,Boolean available, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Donor> donors = donorRepository.searchDonors(bloodGroup,city, pageable);
+        Specification<Donor> specification=Specification.unrestricted();
+        if(bloodGroup!=null){
+            specification=specification.and(DonorSpecification.hasBloodGroup(bloodGroup));
+        }
+        if(city!=null&&!city.isBlank()){
+            specification=specification.and(DonorSpecification.hasCity(city));
+        }
+        if(state!=null&&!state.isBlank()){
+            specification=specification.and(DonorSpecification.hasState(state));
+        }
+        if(gender!=null){
+            specification=specification.and(DonorSpecification.hasGender(gender));
+        }
+        if(available!=null){
+            specification=specification.and(DonorSpecification.hasAvailable(available));
+        }
+        Page<Donor> donors = donorRepository.findAll(specification, pageable);
         Page<DonorSearchResponse> responsePage = donors.map(this::mapToSearchResponse);
         PagedResponse<DonorSearchResponse> pagedResponse =PagedResponse.from(responsePage);
         return pagedResponse;

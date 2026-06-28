@@ -6,6 +6,7 @@ import com.bdms.donor.dto.DonorProfileResponse;
 import com.bdms.donor.dto.DonorSearchResponse;
 import com.bdms.donor.dto.UpdateDonorRequest;
 import com.bdms.donor.entity.BloodGroup;
+import com.bdms.donor.entity.Gender;
 import org.springframework.data.domain.Page;
 
 
@@ -19,5 +20,5 @@ public interface DonorService {
 
     DonorProfileResponse updateMyDonorProfile(UpdateDonorRequest request);
 
-    PagedResponse<DonorSearchResponse> searchDonors(BloodGroup bloodGroup, String city, int page, int size);
+    PagedResponse<DonorSearchResponse> searchDonors(BloodGroup bloodGroup, String city, String state, Gender gender,Boolean available, int page, int size);
 }

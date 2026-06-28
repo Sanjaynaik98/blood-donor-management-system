@@ -7,6 +7,7 @@ import com.bdms.donor.dto.DonorProfileResponse;
 import com.bdms.donor.dto.DonorSearchResponse;
 import com.bdms.donor.dto.UpdateDonorRequest;
 import com.bdms.donor.entity.BloodGroup;
+import com.bdms.donor.entity.Gender;
 import com.bdms.donor.service.DonorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,12 +45,15 @@ public class DonorController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PagedResponse<DonorSearchResponse>>> searchDonors(
-            @RequestParam BloodGroup bloodGroup,
-            @RequestParam String city,
+            @RequestParam(required = false) BloodGroup bloodGroup,
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String state,
+            @RequestParam(required = false) Gender gender,
+            @RequestParam(required = false) Boolean available,
             @RequestParam(defaultValue = "0")int page,
             @RequestParam(defaultValue = "10")int size
             ){
-        PagedResponse<DonorSearchResponse> donors = donorService.searchDonors(bloodGroup,city,page,size);
+        PagedResponse<DonorSearchResponse> donors = donorService.searchDonors(bloodGroup,city,state,gender,available,page,size);
         ApiResponse<PagedResponse<DonorSearchResponse>> response = ApiResponse.success("Donors fetched successfully", donors);
         return new ResponseEntity<>(response,HttpStatus.OK);
     }

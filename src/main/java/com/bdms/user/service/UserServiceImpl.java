@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService{
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
-                .role(Role.DONOR)
+                .role(request.getRole())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
